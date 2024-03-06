@@ -13,6 +13,9 @@ add_library(core_library SHARED
   utils/serializable.cpp 
   utils/serialization_context.cpp 
   utils/serializer.cpp
+  messages/pose_message.cpp
+  messages/odometry_message.cpp
+  messages/base_sensor_message.cpp
 
   # TODO add other .cpp files
 )
