@@ -22,4 +22,6 @@ void FloatList_print(ListHead* list);
 
 void FloatMatrix_print(MatrixHead* matrix);
 
+void FloatMatrixDelete(MatrixHead* matrix);
+
 ListHead* perRowSum(MatrixHead* matrix);
