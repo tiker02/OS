@@ -1,17 +1,17 @@
 #include "linked_list.h"
 
 typedef struct FloatListItem{
-    struct ListItem* list;
+    struct ListItem list;
     float info;
 } FloatListItem;
 
 typedef struct MatrixRow{
-    struct ListItem* list;
+    struct ListItem list;
     struct ListHead* row;
 } MatrixRow;
 
 typedef struct MatrixHead{
-    struct ListHead* list;
+    struct ListHead list;
     int rows;
     int cols;
 } MatrixHead;
