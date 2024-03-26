@@ -54,7 +54,7 @@ int main(void)
     TIMSK5 |= (1<<OCIE5A);
 
 
-    //idle mode enabled  will try using power save in future, but using timer2 is needed   
+    //idle mode enabled  will try using power save in future, but using timer2 is needed -->> tried: problem because timer2 has 8 bits registers   
     SMCR = 0x01;
 
     char counters[]  = {0, 0, 0, 0};
