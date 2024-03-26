@@ -1,0 +1,17 @@
+CC=gcc
+CCOPTS=--std=gnu99 -g -Wall 
+
+BINS=multi_context_example
+
+#disastros_test
+
+.phony: clean all
+
+
+all:	$(BINS)
+
+multi_context_example:		multi_context_example.c $(LIBS)
+	$(CC) $(CCOPTS) -o $@ $^
+
+clean:
+	rm -rf *.o *~ $(LIBS) $(BINS)
