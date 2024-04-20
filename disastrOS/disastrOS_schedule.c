@@ -25,3 +25,10 @@ void internal_schedule() {
     disastrOS_debug(" %d\n", running->pid);
   }
 }
+
+void internal_revert_schedule()
+{
+  List_revert(&ready_list);
+  internal_schedule();
+}
+

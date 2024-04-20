@@ -77,3 +77,23 @@ ListItem* List_detach(ListHead* head, ListItem* item) {
   item->next=item->prev=0;
   return item;
 }
+
+void List_revert(ListHead* head)
+{
+  ListItem* item = head->first;
+  ListItem* next_item = 0;
+  
+  while(item != 0)
+  {
+    next_item = item->next;
+
+    item->next = item->prev;
+    item->prev = next_item;
+
+    item = next_item;
+  }
+
+  ListItem* temp = head->first;
+  head->first = head->last;
+  head->last = temp;
+}
