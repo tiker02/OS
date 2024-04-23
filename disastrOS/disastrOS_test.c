@@ -4,126 +4,57 @@
 
 #include "disastrOS.h"
 
+void waitABit() {
+  for (int i=0; i<100000000; ++i);
+}
+// we need this to handle the sleep state
+void sleeperFunction(void* args){
+  printf("Hello, I am the sleeper, and I sleep %d\n",disastrOS_getpid());
+  while(1) {
+    getc(stdin);
+    disastrOS_printStatus();
+  }
+}
+
+void childFunction(void* args){
+  printf("Hello, I am the child function %d\n",disastrOS_getpid());
+  printf("I will iterate a bit, before terminating\n");
+  for (int i=0; i<(disastrOS_getpid()+1); ++i){
+    printf("PID: %d, iterate %d\n", disastrOS_getpid(), i);
+    waitABit();
+  }
+  printf("PID: %d, terminating\n", disastrOS_getpid());
+  disastrOS_exit(disastrOS_getpid()+1);
+}
+
 
 void initFunction(void* args) {
   disastrOS_printStatus();
-  // below a sequence of actions performed
-  // by the running process
-  // process switch might occur as a consequence of
-  // a preempt action
-  // or a system call
+  printf("hello, I am init and I just started\n");
+  disastrOS_spawn(sleeperFunction, 0);
   
-  // now we are in init
-  // we pretend to fork
-  printf("fork ");
-  int fork_result = disastrOS_fork();
-  printf(" child pid: %d\n", fork_result);
+
+  printf("I feel like to spawn 10 nice threads\n");
+  int alive_children=0;
+  for (int i=0; i<10; ++i) {
+    disastrOS_spawn(childFunction, 0);
+    alive_children++;
+  }
+
   disastrOS_printStatus();
 
-  // we are still in the parent process;
-  // we switch context;
-  printf("preempt \n");
-  disastrOS_preempt();
-  disastrOS_printStatus();
-
-  //we exit from child process
-  disastrOS_exit(-1);
-  disastrOS_printStatus();
-
-  //parent reads value from child
-  int retval=0;
-  int wait_result=disastrOS_wait(0, &retval);
-  printf("returned pid:%d, value:%d \n", wait_result, retval);
-  disastrOS_printStatus();
-
-  // parent forks three times
-  printf("fork ");
-  fork_result = disastrOS_fork();
-  printf(" child pid: %d\n", fork_result);
-  disastrOS_printStatus();
-  printf("fork ");
-  fork_result = disastrOS_fork();
-  printf(" child pid: %d\n", fork_result);
-  disastrOS_printStatus();
-  printf("fork ");
-  fork_result = disastrOS_fork();
-  printf(" child pid: %d\n", fork_result);
-  disastrOS_printStatus();
-
-  // parent waits for process 2
-  printf("wait 2 ");
-  wait_result=disastrOS_wait(2, &retval);
-  disastrOS_printStatus();
-
-  // we are still in the parent process;
-  // we switch context;
-  printf("preempt \n");
-  disastrOS_preempt();
-  disastrOS_printStatus();
-
-
-  printf("fake wait \n");
-  wait_result=disastrOS_wait(0, &retval);
-  printf("returned pid:%d, value:%d \n", wait_result, retval);
-  disastrOS_printStatus();
-
-  printf("fork ");
-  fork_result = disastrOS_fork();
-  printf(" child pid: %d\n", fork_result);
-  disastrOS_printStatus();
-  printf("fork ");
-  fork_result = disastrOS_fork();
-  printf(" child pid: %d\n", fork_result);
-  disastrOS_printStatus();
-
-  printf("preempt \n");
-  disastrOS_preempt();
-  disastrOS_printStatus();
-  printf("preempt \n");
-  disastrOS_preempt();
-  disastrOS_printStatus();
-
-  printf("exit\n");
-  disastrOS_exit(-1);
-  disastrOS_printStatus();
-
-  printf("preempt \n");
-  disastrOS_preempt();
-  disastrOS_printStatus();
-  printf("preempt \n");
-  disastrOS_preempt();
-  disastrOS_printStatus();
-  printf("preempt \n");
-  disastrOS_preempt();
-  disastrOS_printStatus();
-
-  printf("exit\n");
-  disastrOS_exit(-1);
-  disastrOS_printStatus();
-
-  printf("preempt \n");
-  disastrOS_preempt();
-  disastrOS_printStatus();
-  
-  printf("wait alive process \n");
-  wait_result=disastrOS_wait(4, &retval);
-  disastrOS_printStatus();
-
-  printf("preempt \n");
-  disastrOS_preempt();
-  disastrOS_printStatus();
-
-  printf("preempt \n");
-  disastrOS_preempt();
-  disastrOS_printStatus();
-
-  printf("exit\n");
-  disastrOS_exit(-1);
-  disastrOS_printStatus();
-
-  printf("wait any process \n");
-  wait_result=disastrOS_wait(0, &retval);
-  disastrOS_printStatus();
+  printf("waiting for childs to terminate...\n");
+  int retval;
+  int pid;
+  while(alive_children>0 && (pid=disastrOS_wait(0, &retval))>=0){ 
+    disastrOS_printStatus();
+    printf("initFunction, child: %d terminated, retval:%d, alive: %d \n",
+	   pid, retval, alive_children);
+    waitABit();
+    --alive_children;
+  }
+  printf("shutdown!");
+  disastrOS_shutdown();
 }
 
 int main(int argc, char** argv){
@@ -134,6 +65,7 @@ int main(int argc, char** argv){
   // we create the init process processes
   // the first is in the running variable
   // the others are in the ready queue
+  printf("the function pointer is: %p", childFunction);
   // spawn an init process
   printf("start\n");
   disastrOS_start(initFunction, 0, logfilename);

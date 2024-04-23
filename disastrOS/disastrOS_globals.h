@@ -16,10 +16,11 @@ extern ListHead zombie_list;  // zombies
 extern volatile int disastrOS_time; //global time of disastrOS
 
 // a resource can be a device, a file or an ipc thing
-extern ListHead resources_list; // resources
-extern ListHead timer_list;     //timers (concrete)
-typedef void(*SyscallFunctionType)();
 
+typedef void(*SyscallFunctionType)();
 
 // this is used for shutting down (set it to 1, and return the control to main)
 extern int shutdown_now;
+
+// these are used for "trapping" in protected mode
+extern ucontext_t main_context;
