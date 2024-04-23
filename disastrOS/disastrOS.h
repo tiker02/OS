@@ -25,7 +25,7 @@ int disastrOS_fork();
 void disastrOS_exit(int exit_value);
 int disastrOS_wait(int pid, int* retval);
 void disastrOS_preempt();
-void disastrOS_spawn(void (*f)(void*), void* args );
+void disastrOS_spawn(void (*f)(void*), void* args, int priority);
 void disastrOS_shutdown();
 
 // debug function, prints the state of the internal system

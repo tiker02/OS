@@ -42,7 +42,8 @@ void timerInterrupt(){
   printf("time: %d\n", disastrOS_time);
 
   // call the scheduler!!!
-  internal_schedule();
+  internal_priority_schedule();
+  //internal_schedule();
 
   if (log_file)
     fprintf(log_file, "TIME: %d\tPID: %d\tACTION: %s\n", disastrOS_time, running->pid, "TIMER_IN");
@@ -152,7 +153,7 @@ void disastrOS_preempt() {
   disastrOS_syscall(DSOS_CALL_PREEMPT);
 }
 
-void disastrOS_spawn(void (*f)(void*), void* args ) {
+void disastrOS_spawn(void (*f)(void*), void* args, int priority) {
   disastrOS_syscall(DSOS_CALL_SPAWN, f, args);
 }
 
@@ -183,7 +184,7 @@ void disastrOS_start(void (*f)(void*), void* f_args, char* logfile){
   syscall_numarg[DSOS_CALL_FORK]      = 0;
 
   syscall_vector[DSOS_CALL_SPAWN]      = internal_spawn;
-  syscall_numarg[DSOS_CALL_SPAWN]      = 2;
+  syscall_numarg[DSOS_CALL_SPAWN]      = 3;
 
   syscall_vector[DSOS_CALL_WAIT]      = internal_wait;
   syscall_numarg[DSOS_CALL_WAIT]      = 2;

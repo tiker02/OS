@@ -114,7 +114,7 @@ void PCBPtrList_print(ListHead* head) {
 }
 
 void PCB_print(PCB* pcb){
-  printf("[pid: %d, child: ", pcb->pid);
+  printf("[pid: %d, current_priority: %d, child: ", pcb->pid, pcb->current_priority);
   
   PCBPtrList_print(&pcb->children);
   printf("]");

@@ -5,5 +5,7 @@
 #include "disastrOS_syscalls.h"
 
 void internal_preempt() {
-  internal_revert_schedule();
+  //internal_revert_schedule();
+  printf("\n\n PREEMPT CALLED");
+  internal_priority_schedule();
 }

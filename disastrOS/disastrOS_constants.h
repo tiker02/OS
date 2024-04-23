@@ -30,4 +30,4 @@
 
 // scheduling
 #define ALPHA 0.5f
-#define INTERVAL 10 // milliseconds for timer tick
+#define INTERVAL 5 // milliseconds for timer tick

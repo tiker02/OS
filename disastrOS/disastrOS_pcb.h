@@ -24,6 +24,8 @@ typedef struct PCB{
   ListHead children;
   ucontext_t cpu_state;
   struct TimerItem *timer;
+  int process_priority;
+  int current_priority;
 
   //we are really rude :) the stack is INSIDE the pcb
   //forgive me for the bestiality

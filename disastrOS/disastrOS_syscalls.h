@@ -18,3 +18,5 @@ void internal_shutdown();
 void internal_schedule();
 
 void internal_revert_schedule();
+
+void internal_priority_schedule();

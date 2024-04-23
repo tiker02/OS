@@ -40,5 +40,7 @@ void internal_spawn(){
   sigemptyset(&new_pcb->cpu_state.uc_sigmask);
   new_pcb->cpu_state.uc_link = &main_context;
   void (*new_function) (void*)= (void(*)(void*))  running->syscall_args[0];
+  new_pcb->process_priority = running->syscall_args[2];
+  new_pcb->current_priority = new_pcb->process_priority;
   makecontext(&new_pcb->cpu_state, (void(*)())  new_function, 1, (void*)running->syscall_args[1]);
 }
