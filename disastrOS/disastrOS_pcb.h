@@ -2,6 +2,7 @@
 #include <ucontext.h> // this is the cpu status
 #include "disastrOS_constants.h"
 #include "linked_list.h"
+#include "disastrOS_timer.h"
 
 typedef enum ProcessStatus {Invalid=-1,
 			    Created=0x0,
@@ -24,8 +25,6 @@ typedef struct PCB{
   ListHead children;
   ucontext_t cpu_state;
   struct TimerItem *timer;
-  int process_priority;
-  int current_priority;
 
   //we are really rude :) the stack is INSIDE the pcb
   //forgive me for the bestiality

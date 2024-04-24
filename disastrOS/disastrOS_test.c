@@ -4,9 +4,6 @@
 
 #include "disastrOS.h"
 
-void waitABit() {
-  for (int i=0; i<100000000; ++i);
-}
 // we need this to handle the sleep state
 void sleeperFunction(void* args){
   printf("Hello, I am the sleeper, and I sleep %d\n",disastrOS_getpid());
@@ -21,7 +18,7 @@ void childFunction(void* args){
   printf("I will iterate a bit, before terminating\n");
   for (int i=0; i<(disastrOS_getpid()+1); ++i){
     printf("PID: %d, iterate %d\n", disastrOS_getpid(), i);
-    waitABit();
+    disastrOS_sleep((20-disastrOS_getpid())*5);
   }
   printf("PID: %d, terminating\n", disastrOS_getpid());
   disastrOS_exit(disastrOS_getpid()+1);
@@ -31,26 +28,23 @@ void childFunction(void* args){
 void initFunction(void* args) {
   disastrOS_printStatus();
   printf("hello, I am init and I just started\n");
-  disastrOS_spawn(sleeperFunction, 0, 1);
+  disastrOS_spawn(sleeperFunction, 0);
   
 
   printf("I feel like to spawn 10 nice threads\n");
   int alive_children=0;
   for (int i=0; i<10; ++i) {
-    disastrOS_spawn(childFunction, 0, i%3);
+    disastrOS_spawn(childFunction, 0);
     alive_children++;
   }
 
   disastrOS_printStatus();
-
-  printf("waiting for childs to terminate...\n");
   int retval;
   int pid;
   while(alive_children>0 && (pid=disastrOS_wait(0, &retval))>=0){ 
     disastrOS_printStatus();
     printf("initFunction, child: %d terminated, retval:%d, alive: %d \n",
 	   pid, retval, alive_children);
-    waitABit();
     --alive_children;
   }
   printf("shutdown!");

@@ -55,6 +55,20 @@ void internal_exit(){
     int* result=(int*)parent->syscall_args[1];
     if (result)
       *result=running->return_value;
+
+    // we release all timers put by this process from the timer list, in case there was someone
+    // hanging
+    // WARNING: untested
+    ListItem* aux=timer_list.first;
+    while(aux){
+      TimerItem* timer=(TimerItem*) aux;
+      aux=aux->next;
+      if (timer->pcb==running){
+	ListItem* detach_result=List_detach(&timer_list, (ListItem*)timer);
+	assert(detach_result);
+	TimerItem_free(timer);
+      }
+    }
     
     // the process finally dies
     ListItem* suppressed_item = List_detach(&zombie_list, (ListItem*) running);

@@ -5,6 +5,7 @@
 #include "disastrOS_pcb.h"
 #include "disastrOS.h"
 #include "disastrOS_globals.h"
+#include "disastrOS_timer.h"
 
 #define PCB_SIZE sizeof(PCB)
 #define PCB_MEMSIZE (sizeof(PCB)+sizeof(int))
@@ -114,7 +115,7 @@ void PCBPtrList_print(ListHead* head) {
 }
 
 void PCB_print(PCB* pcb){
-  printf("[pid: %d, current_priority: %d, child: ", pcb->pid, pcb->current_priority);
+  printf("[pid: %d, child: ", pcb->pid);
   
   PCBPtrList_print(&pcb->children);
   printf("]");
