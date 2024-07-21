@@ -11,8 +11,8 @@ HEADERS = serial_client.h
 
 all:	$(BINS)
 
-serial_client:		serial_client.c $(LIBS)
-	$(CC) $(CCOPTS) -o $@ $^
+serial_client:		serial_client.c $(LIBS) 
+	$(CC) $(CCOPTS) -o $@ $^ -lpthread
 
 clean:
 	rm -rf *.o *~ $(LIBS) $(BINS)

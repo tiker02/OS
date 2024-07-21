@@ -7,9 +7,9 @@
 
 
 
-#define SERIAL_NAME 
+#define SERIAL_NAME "/dev/ttyACM0"
 #define BAUDRATE B19200
-#define BUF_SISE 1024
+#define BUF_SIZE 1024
 
 int serial_open();
 
