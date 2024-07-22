@@ -66,24 +66,35 @@ void* read_serial()
     if(DEBUG) fprintf(stderr, "Reading thread started\n");
     char read_buf[BUF_SIZE];
 
-    while(1)
+    FILE* out_file = fopen("./output.txt", "w");
+    if(out_file == NULL) { perror("Error occurred while opening output file\n"); exit(EXIT_FAILURE); } 
+    if(DEBUG)
     {
-        int ret = sem_wait(&terminal_semaphore);
+        fprintf(stderr, "Output file successfully opened\n");
+        fprintf(out_file, "Out:\n");
+    }
+
+    int ret, rd = 1;
+    while(read_buf[rd - 1] != '\n')
+    {
+        ret = sem_wait(&terminal_semaphore);
         if(ret == -1) { perror("Error occurred on sem_wait@write_serial\n"); exit(EXIT_FAILURE); }
 
         if(DEBUG) fprintf(stderr, "Going to read\n");
 
-        int rd = read(serial_fd, read_buf, BUF_SIZE);
+        rd = read(serial_fd, read_buf, BUF_SIZE);
         if(rd == -1){
             perror("Error occcurred while reading\n");
             exit(EXIT_FAILURE);
         } 
-        printf("Reading... %s", read_buf);
-        
+        //if(DEBUG) fprintf(out_file, "Read:\n");
+        fwrite(read_buf, sizeof(char), rd, out_file);        
         ret = sem_post(&terminal_semaphore);
         if(ret == -1) { perror("Error occurred on sem_post@write_serial\n"); exit(EXIT_FAILURE); }
     }
 
+    ret = fclose(out_file);
+    if(ret != 0) { perror("Error occurred while closing output file\n"); exit(EXIT_FAILURE); } 
     pthread_exit(NULL);
 }
 
@@ -110,8 +121,8 @@ int main()
     if(ret != 0) { perror("Error occurred in writing thread detaching\n"); exit(EXIT_FAILURE);}
     ret = pthread_join(read_thread, NULL);
     if(ret != 0) { perror("Error occurred in reading thread detaching\n"); exit(EXIT_FAILURE);}
-    ret = sem_destroy(&terminal_semaphore);
-    if(ret == -1) { perror("Error occurred in semaphore destroying\n"); exit(EXIT_FAILURE); }
+    //ret = sem_destroy(&terminal_semaphore);
+    //if(ret == -1) { perror("Error occurred in semaphore destroying\n"); exit(EXIT_FAILURE); }
 
     return 0;
 }

@@ -1,58 +1,44 @@
-# set this to false to disable sonars in firmware
-CC=avr-gcc
-AS=avr-gcc
-INCLUDE_DIRS=-I.
-CC_OPTS=-Wall --std=gnu99 -DF_CPU=16000000UL -O3 -funsigned-char -funsigned-bitfields  -fshort-enums -Wall -Wstrict-prototypes -mmcu=atmega2560 $(INCLUDE_DIRS)  -D__AVR_3_BYTE_PC__
-AS_OPTS=-x assembler-with-cpp $(CC_OPTS)
+# AVR makefile stub
 
-AVRDUDE=avrdude
+# to clean a folder
+# from command line
+#$> make clean
 
-# com1 = serial port. Use lpt1 to connect to parallel port.
-AVRDUDE_PORT = /dev/ttyACM0    # programmer connected to serial device
+# to build the folder
+#$> make 
 
-AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET):i
-AVRDUDE_FLAGS = -p m2560 -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER) -b 115200
-AVRDUDE_FLAGS += $(AVRDUDE_NO_VERIFY)
-AVRDUDE_FLAGS += $(AVRDUDE_VERBOSE)
-AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
-AVRDUDE_FLAGS += -D -q -V -C /usr/share/arduino/hardware/tools/avr/../avrdude.conf
-AVRDUDE_FLAGS += -c wiring
+# to upload a file
+# from command line
+# $> make <main_filename>.hex
 
-
-OBJS=uart.o\
-     tcb.o\
-     tcb_list.o\
-     atomport_asm.o\
-     timer.o\
-     scheduler.o\
-
-HEADERS=uart.h\
-        tcb.h.h\
-	tcb_list.h\
-	atomport_asm.h\
-	timer.h\
-        scheduler.h
-
-BINS= main.elf tcb_queue_test.elf
-
-.phony:	clean all
-
-all:	$(BINS) 
-
-#common objects
-%.o:	%.c 
-	$(CC) $(CC_OPTS) -c  $<
-
-%.o:	%.s 
-	$(AS) $(AS_OPTS) -c  $<
-
-%.elf:	%.o $(OBJS)
-	$(CC) $(CC_OPTS) -o $@ $< $(OBJS) $(LIBS)
+#
+# remember to give yourself the read/write permissions on the
+# serial line
+# $> sudo addgroup <your username> dialout
+# reboot
 
 
-%.hex:	%.elf
-	avr-objcopy -O ihex -R .eeprom $< $@
-	$(AVRDUDE) $(AVRDUDE_FLAGS) -U flash:w:$@:i #$(AVRDUDE_WRITE_EEPROM) 
 
-clean:	
-	rm -rf $(OBJS) $(BINS) *.hex *~ *.o
+# !!!!!!!!!!!!!!!! MODIFY HERE !!!!!!!!!!!!!!!! 
+
+# put here the file containing the main routine
+# to be uploaded on the avr
+# you can add multiple files, they will be all generated
+
+BINS=echo.elf
+
+# put here the additional .o files you want to generate
+# one .c file for each .o should be present
+OBJS=avr_common/uart.o
+
+# put here the additional header files needed for compilation
+HEADERS=avr_common/uart.h
+
+# the file below contains the actual rules
+
+include avr_common/avr.mk
+
+# !!!!!!!!!!!!!!!! MODIFY HERE !!!!!!!!!!!!!!!! 
+
+
+

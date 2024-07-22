@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <avr/io.h>
-#include "../avr_common/uart.h"
+#include "avr_common/uart.h"
 
 
 int main(void)
