@@ -32,6 +32,15 @@ void server(uint32_t thread_arg __attribute__((unused))){
   }
 }
 
+TCB stupid;
+uint8_t stupid_stack[THREAD_STACK_SIZE];
+void fn(uint32_t arg __attribute__((unused))){
+  while(1)
+  {
+    printf("Ma allora...\n");
+  }
+}
+
 TCB init_tcb;
 uint8_t init_stack[THREAD_STACK_SIZE];
 void init(uint32_t arg __attribute__((unused))){
@@ -40,20 +49,31 @@ void init(uint32_t arg __attribute__((unused))){
     TCB_create(server_threads + i, server_stacks + i*THREAD_STACK_SIZE -1, server, 0);
     TCBList_enqueue(&running_queue, server_threads + i);
   }
-  SMCR = 0x01;
+  printf("Init worked\n");
+  SMCR |= 0x01;
   sleep_cpu();
 }
 
 
 int main(void){
   usart_init();
+  printf_init();
 
+  printf("Initialized program\n");
+  printf("Initiated: %p\n", &init_tcb);
   TCB_create(&init_tcb,
              init_stack+THREAD_STACK_SIZE-1,
              init,
              0);
 
+  TCB_create(&stupid, stupid_stack + THREAD_STACK_SIZE-1, fn, 0);
+
   
   TCBList_enqueue(&running_queue, &init_tcb);
+  TCBList_enqueue(&running_queue, &stupid);
+  TCBList_print(&running_queue);
+
+  
   startSchedule();
+  printf("Post\n");
 }

@@ -18,21 +18,26 @@ TCBList running_queue={
 
 
 void startSchedule(void){
+  printf("Startshedule, %p\n", current_tcb);
   cli();
   current_tcb=TCBList_dequeue(&running_queue);
+  printf("Startschedule, %p\n", current_tcb);
   assert(current_tcb);
   timerStart();
   archFirstThreadRestore(current_tcb);
 }
 
 void schedule(void) {
+  
   TCB* old_tcb=current_tcb;
   // we put back the current thread in the queue
   TCBList_enqueue(&running_queue, current_tcb);
-
   // we fetch the next;
   current_tcb=TCBList_dequeue(&running_queue);
+  printf("Scheduling1: %p, %p\n", old_tcb, current_tcb);
   // we jump to it (useless if it is the only process)
-  if (old_tcb!=current_tcb)
+  if (old_tcb!=current_tcb){
+    printf("Scheduling2\n");
     archContextSwitch(old_tcb, current_tcb);
+  }
 }
