@@ -24,7 +24,7 @@ void set_serial_communication_interface(int fd)
     cfmakeraw(&tty);
     tty.c_cflag &= ~(PARENB | PARODD);
     tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;
-    tty.c_cc[VMIN]  = 1;
+    tty.c_cc[VMIN]  = 0;
     tty.c_cc[VTIME] = 5;
 
     if (tcsetattr (fd, TCSANOW, &tty) != 0) perror("Error occurred in setting serial interface attributes\n");
@@ -87,7 +87,7 @@ void* read_serial()
             perror("Error occcurred while reading\n");
             exit(EXIT_FAILURE);
         } 
-        if(DEBUG) fprintf(out_file, "\nRead:\n");
+        if(DEBUG) {fprintf(out_file, "\nRead:\n"); fprintf(stderr, "Read. %s\n", read_buf); }
         fwrite(read_buf, sizeof(char), rd, out_file);        
         ret = sem_post(&terminal_semaphore);
         if(ret == -1) { perror("Error occurred on sem_post@write_serial\n"); exit(EXIT_FAILURE); }
