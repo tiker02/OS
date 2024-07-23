@@ -87,7 +87,7 @@ void* read_serial()
             perror("Error occcurred while reading\n");
             exit(EXIT_FAILURE);
         } 
-        //if(DEBUG) fprintf(out_file, "Read:\n");
+        if(DEBUG) fprintf(out_file, "\nRead:\n");
         fwrite(read_buf, sizeof(char), rd, out_file);        
         ret = sem_post(&terminal_semaphore);
         if(ret == -1) { perror("Error occurred on sem_post@write_serial\n"); exit(EXIT_FAILURE); }
