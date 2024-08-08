@@ -2,6 +2,7 @@
 #include"atomport_asm.h"
 #include"scheduler.h"
 #include<util/atomic.h>
+#include<stdio.h>
 
 io_structure read_structure = {
     .offset = 0,
@@ -9,7 +10,7 @@ io_structure read_structure = {
 };
 io_structure write_structure = {
     .offset = 0,
-    .difference = BUF_SIZE
+    .difference = 0
 };
 
 TCBList read_waiting_queue = {
@@ -34,7 +35,7 @@ void wait(TCBList* io_waiting_queue)
     current_tcb = TCBList_dequeue(&running_queue);
     archContextSwitch(wait_tcb, current_tcb);
 }
-
+ v
 char getChar()
 {
     char c = 0;
@@ -56,20 +57,23 @@ void putChar(char c)
 {
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
     {
+        info();
         while(! (write_structure.difference > 0))
         {
             NONATOMIC_BLOCK(NONATOMIC_RESTORESTATE){
             wait(&write_waiting_queue);
             }
         }
-        write_structure.buffer[(write_structure.offset++)%BUF_SIZE] = c;
-        write_structure.difference--;
+        write_structure.buffer[(write_structure.offset+write_structure.difference)%BUF_SIZE] = c;
+        write_structure.difference++;
+        info();
     }
 }
 
 ISR(USART0_RX_vect)
 {
     cli();
+    printf("UAH\n");
     if(read_structure.difference < BUF_SIZE - 1)
     {
         read_structure.buffer[(read_structure.offset + read_structure.difference)%BUF_SIZE] = UDR0;
@@ -84,10 +88,11 @@ ISR(USART0_TX_vect)
     cli();
     if(write_structure.difference < BUF_SIZE - 1)
     {
-        UDR0 = write_structure.buffer[((write_structure.offset + write_structure.difference)%BUF_SIZE)];
-        write_structure.difference++;
+        UDR0 = write_structure.buffer[((write_structure.offset)%BUF_SIZE)];
+        write_structure.difference--;
         wake_up(&write_waiting_queue);
     }
+    else UDR0 = 's';
     sei();
 }
 
@@ -98,4 +103,19 @@ void wake_up(TCBList* io_waiting_queue)
 
     current_tcb = TCBList_dequeue(io_waiting_queue);
     archContextSwitch(old_tcb, current_tcb);
+}
+
+
+/////////////////////////////
+//DEBUG AND TESTING
+
+void info()
+{
+    printf("read: offset: %d difference: %d\n", read_structure.offset, read_structure.difference);
+    printf("%s\n", read_structure.buffer);
+    TCBList_print(read_waiting_queue);
+
+    printf("write: offset: %d difference: %d\n", write_structure.offset, write_structure.difference);
+    printf("%s\n", write_structure.buffer);
+    TCBList_print(write_waiting_queue);
 }
