@@ -17,3 +17,5 @@ void putChar(char c);
 void wait(TCBList* io_waiting_list);
 
 void wake_up(TCBList* io_waiting_queue);
+
+void info(void);

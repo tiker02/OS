@@ -24,7 +24,7 @@ void io(uint32_t thread_arg __attribute__((unused)))
     }
 }
 
-char i = "0";
+char i = '0';
 TCB counter_task;
 uint8_t counter_stack[64];
 void count(uint32_t thread_arg __attribute__((unused)))
@@ -35,9 +35,17 @@ void count(uint32_t thread_arg __attribute__((unused)))
     }
 }
 
-void main()
+int main()
 {
     printf_init();
     printf("Starting\n");
     TCB_create(&counter_task, counter_stack + 63, count, 0);
+    printf("Counter task succesfully created\n");
+    TCB_create(&io_task, io_stack, io, 0);
+    printf("IO task succesfully created");
+    TCBList_enqueue(&running_queue, &counter_task);
+    TCBList_enqueue(&running_queue, &io_task);
+    printf("Running queue created");
+
+    startSchedule();
 }

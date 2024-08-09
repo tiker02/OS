@@ -35,7 +35,7 @@ void wait(TCBList* io_waiting_queue)
     current_tcb = TCBList_dequeue(&running_queue);
     archContextSwitch(wait_tcb, current_tcb);
 }
- v
+
 char getChar()
 {
     char c = 0;
@@ -109,13 +109,13 @@ void wake_up(TCBList* io_waiting_queue)
 /////////////////////////////
 //DEBUG AND TESTING
 
-void info()
+void info(void)
 {
     printf("read: offset: %d difference: %d\n", read_structure.offset, read_structure.difference);
     printf("%s\n", read_structure.buffer);
-    TCBList_print(read_waiting_queue);
+    TCBList_print(&read_waiting_queue);
 
     printf("write: offset: %d difference: %d\n", write_structure.offset, write_structure.difference);
     printf("%s\n", write_structure.buffer);
-    TCBList_print(write_waiting_queue);
+    TCBList_print(&write_waiting_queue);
 }
