@@ -73,6 +73,8 @@ void putChar(char c)
 ISR(USART0_RX_vect)
 {
     cli();
+    //char c = UDR0;
+    //printf("%c", c);
     printf("UAH\n");
     if(read_structure.difference < BUF_SIZE - 1)
     {
@@ -86,6 +88,7 @@ ISR(USART0_RX_vect)
 ISR(USART0_TX_vect)
 {
     cli();
+    printf("UOH");
     if(write_structure.difference < BUF_SIZE - 1)
     {
         UDR0 = write_structure.buffer[((write_structure.offset)%BUF_SIZE)];

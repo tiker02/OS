@@ -1,6 +1,7 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <assert.h>
+#include <stdio.h>
 #include "tcb.h"
 #include "tcb_list.h"
 #include "atomport_asm.h"
@@ -37,7 +38,7 @@ void schedule(void) {
   printf("Scheduling1: %p, %p\n", old_tcb, current_tcb);
   // we jump to it (useless if it is the only process)
   if (old_tcb!=current_tcb){
-    printf("Scheduling2\n");
+    printf("Scheduling2, %p\n", current_tcb);
     archContextSwitch(old_tcb, current_tcb);
   }
 }

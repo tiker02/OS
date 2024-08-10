@@ -13,6 +13,8 @@
 #include "scheduler.h"
 #include "async_io.h"
 
+char i = '0';
+
 TCB io_task;
 uint8_t io_stack[256];
 
@@ -20,32 +22,34 @@ void io(uint32_t thread_arg __attribute__((unused)))
 {
     while(1)
     {
-        putChar("i");
+        printf("ecco...");
+        //putChar(i);
     }
 }
 
-char i = '0';
+
 TCB counter_task;
 uint8_t counter_stack[64];
 void count(uint32_t thread_arg __attribute__((unused)))
 {
     while(1)
     {
+        printf("AOH\n");
         i++;
     }
 }
 
-int main()
+int main(void)
 {
     printf_init();
     printf("Starting\n");
     TCB_create(&counter_task, counter_stack + 63, count, 0);
     printf("Counter task succesfully created\n");
     TCB_create(&io_task, io_stack, io, 0);
-    printf("IO task succesfully created");
+    printf("IO task succesfully created\n");
     TCBList_enqueue(&running_queue, &counter_task);
     TCBList_enqueue(&running_queue, &io_task);
-    printf("Running queue created");
+    printf("Running queue created\n");
 
     startSchedule();
 }
