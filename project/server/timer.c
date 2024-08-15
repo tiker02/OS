@@ -1,4 +1,5 @@
 #include "timer.h"
+#include<util/atomic.h>
 
 // main scheduler function
 extern void schedule(void);
@@ -33,5 +34,5 @@ void timerStart ( void )
 // timer interrupt
 ISR (TIMER1_COMPA_vect)
 {
-    schedule();
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE){ schedule(); }
 }
