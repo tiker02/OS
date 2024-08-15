@@ -2,6 +2,7 @@
 #include"atomport_asm.h"
 #include"scheduler.h"
 #include<util/atomic.h>
+#include <avr/interrupt.h>
 #include<stdio.h>
 
 io_structure read_structure = {
@@ -29,11 +30,14 @@ TCBList write_waiting_queue = {
 
 void wait(TCBList* io_waiting_queue)
 {
-    TCB* wait_tcb = current_tcb;
-    TCBList_enqueue(io_waiting_queue, wait_tcb);
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        TCB* wait_tcb = current_tcb;
+        TCBList_enqueue(io_waiting_queue, wait_tcb);
 
-    current_tcb = TCBList_dequeue(&running_queue);
-    archContextSwitch(wait_tcb, current_tcb);
+        current_tcb = TCBList_dequeue(&running_queue);
+        archContextSwitch(wait_tcb, current_tcb);
+    }
 }
 
 char getChar()
@@ -43,9 +47,7 @@ char getChar()
     {
         while(! (read_structure.difference > 0))
         {
-            NONATOMIC_BLOCK(NONATOMIC_RESTORESTATE){
             wait(&read_waiting_queue);
-            }
         }
         c = read_structure.buffer[(read_structure.offset++)%BUF_SIZE];
         read_structure.difference--;
@@ -58,46 +60,54 @@ void putChar(char c)
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
     {
         info();
-        while(! (write_structure.difference > 0))
-        {
-            NONATOMIC_BLOCK(NONATOMIC_RESTORESTATE){
+        while(! (write_structure.difference > 0)){
             wait(&write_waiting_queue);
-            }
         }
         write_structure.buffer[(write_structure.offset+write_structure.difference)%BUF_SIZE] = c;
+        write_structure.buffer[(write_structure.offset+write_structure.difference + 1)%BUF_SIZE] = 0;
         write_structure.difference++;
         info();
+        UCSR0B |= 1<<UDRIE0;
     }
 }
 
 ISR(USART0_RX_vect)
 {
-    cli();
-    //char c = UDR0;
-    //printf("%c", c);
-    printf("UAH\n");
-    if(read_structure.difference < BUF_SIZE - 1)
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
     {
-        read_structure.buffer[(read_structure.offset + read_structure.difference)%BUF_SIZE] = UDR0;
-        read_structure.difference++;
-        wake_up(&read_waiting_queue);
+        //char c = UDR0;
+        //printf("%c", c);
+        printf("UAH\n");
+        if(read_structure.difference < BUF_SIZE - 1)
+        {
+            read_structure.buffer[(read_structure.offset + read_structure.difference)%BUF_SIZE] = UDR0;
+            read_structure.difference++;
+            wake_up(&read_waiting_queue);
+        }
     }
-    sei();
 }
 
-ISR(USART0_TX_vect)
+ISR(USART0_UDRE_vect)
 {
-    cli();
-    printf("UOH");
-    if(write_structure.difference < BUF_SIZE - 1)
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
     {
-        UDR0 = write_structure.buffer[((write_structure.offset)%BUF_SIZE)];
-        write_structure.difference--;
-        wake_up(&write_waiting_queue);
+        printf("UOH");
+        if(write_structure.difference < BUF_SIZE - 1)
+        {
+            UDR0 = write_structure.buffer[((write_structure.offset)%BUF_SIZE)];
+            write_structure.difference--;
+            wake_up(&write_waiting_queue);
+        }
+        else UDR0 = 's';
+        if(write_structure.difference == 0)
+        {
+            UCSR0B &= ~(1<<UDRIE0);
+        }
+
     }
-    else UDR0 = 's';
-    sei();
 }
+
+ISR(BADISR_vect){ reti(); }
 
 void wake_up(TCBList* io_waiting_queue)
 {

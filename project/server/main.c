@@ -2,6 +2,7 @@
 #include <avr/io.h>
 #include <avr/sleep.h>
 #include <assert.h>
+#include <util/atomic.h>
 #include <util/delay.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -44,19 +45,24 @@ void fn(uint32_t arg __attribute__((unused))){
 TCB init_tcb;
 uint8_t init_stack[THREAD_STACK_SIZE];
 void init(uint32_t arg __attribute__((unused))){
-  for(int i = 0; i < SERVERS; i++)
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
   {
-    TCB_create(server_threads + i, server_stacks + i*THREAD_STACK_SIZE -1, server, 0);
-    TCBList_enqueue(&running_queue, server_threads + i);
+    for(int i = 0; i < SERVERS; i++)
+    {
+      TCB_create(server_threads + i, server_stacks + i*THREAD_STACK_SIZE -1, server, 0);
+      TCBList_enqueue(&running_queue, server_threads + i);
+    }
+    TCBList_print(&running_queue);
+    printf("Init worked\n");
+    while(1){
+      SMCR |= 0x01;
+      sleep_cpu();
+    }
   }
-  printf("Init worked\n");
-  SMCR |= 0x01;
-  sleep_cpu();
 }
 
 
 int main(void){
-  usart_init();
   printf_init();
 
   printf("Initialized program\n");

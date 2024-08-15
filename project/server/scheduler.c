@@ -34,6 +34,7 @@ void schedule(void) {
   // we put back the current thread in the queue
   TCBList_enqueue(&running_queue, current_tcb);
   // we fetch the next;
+  TCBList_print(&running_queue);
   current_tcb=TCBList_dequeue(&running_queue);
   printf("Scheduling1: %p, %p\n", old_tcb, current_tcb);
   // we jump to it (useless if it is the only process)

@@ -75,7 +75,7 @@ void* read_serial()
     }
 
     int ret, rd = 1;
-    while(read_buf[rd - 1] != '\n')
+    while(read_buf[rd - 1] != 'e')
     {
         ret = sem_wait(&terminal_semaphore);
         if(ret == -1) { perror("Error occurred on sem_wait@write_serial\n"); exit(EXIT_FAILURE); }
