@@ -54,6 +54,7 @@ void p2_fn(uint32_t arg __attribute__((unused))){
 int main(void){
   // we need printf for debugging
   printf_init();
+  printf("Initializing: %x\n", MCUSR);
 
   TCB_create(&idle_tcb,
              idle_stack+IDLE_STACK_SIZE-1,
@@ -70,10 +71,13 @@ int main(void){
              p2_fn,
              0);
 
+  printf("TCBs created\n");
   
   TCBList_enqueue(&running_queue, &p1_tcb);
   TCBList_enqueue(&running_queue, &p2_tcb);
   TCBList_enqueue(&running_queue, &idle_tcb);
+
+  printf("TCBs in running queue\n");
 
   printf("starting\n");
   startSchedule();
