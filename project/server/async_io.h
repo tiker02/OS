@@ -11,6 +11,10 @@ typedef struct io_structure
     uint8_t digested;
 } io_structure;
 
+void getChar(void);
+
+void getChar_test00(void);
+
 void putChar(char c);
 
 void send(void);

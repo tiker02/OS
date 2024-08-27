@@ -11,14 +11,48 @@ io_structure writing =
     .digested = 0
 };
 
+io_structure reading =
+ {
+    .saved = 0,
+    .digested = 0
+ };
+
+
+void getChar(void)
+{
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        while(reading.digested == reading.saved)
+        {
+            NONATOMIC_BLOCK(NONATOMIC_RESTORESTATE){
+            reading.buffer[256] = 0; //pure debug
+            _delay_ms(10);
+            }
+        }
+        printf("%c\n", reading.buffer[reading.digested]);
+        reading.buffer[reading.digested++] = 'd';
+    }
+}
+
+void getChar_test00(void)
+{
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        if(reading.saved != (reading.digested - 1))
+        {
+            reading.buffer[reading.saved++] = 'c';
+        }
+    }
+}
+
 void putChar(char c)
 {
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-        NONATOMIC_BLOCK(NONATOMIC_RESTORESTATE){
-            while(writing.saved == (writing.digested - 1))
-            {
-                writing.buffer[256] = 0; //pure debug
-                _delay_ms(10);
+        while(writing.saved == (writing.digested - 1))
+        {
+            NONATOMIC_BLOCK(NONATOMIC_RESTORESTATE){
+            writing.buffer[256] = 0; //pure debug
+            _delay_ms(10);
             }
         }
         writing.buffer[writing.saved++] = c;        
@@ -37,5 +71,6 @@ void send(void){
 
 void info(void)
 {
-    printf("Saved: %d, digested: %d,     buf: %s\n", writing.saved, writing.digested, writing.buffer);
+    printf("Writing -> Saved: %d, digested: %d,     buf: %s\n", writing.saved, writing.digested, writing.buffer);
+    printf("Reading -> Saved: %d, digested: %d,     buf: %s\n", reading.saved, reading.digested, reading.buffer);
 }

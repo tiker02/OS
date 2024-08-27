@@ -25,6 +25,7 @@ void idle_fn(uint32_t thread_arg __attribute__((unused))){
   while(1) {
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
       send();
+      getChar_test00();
     }
     _delay_ms(10);
   }
@@ -58,6 +59,19 @@ void p2_fn(uint32_t arg __attribute__((unused))){
   }
 }
 
+TCB p3_tcb;
+uint8_t p3_stack[THREAD_STACK_SIZE];
+void p3_fn(uint32_t arg __attribute__((unused))){
+  NONATOMIC_BLOCK(NONATOMIC_RESTORESTATE){
+  while(1){
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+      getChar();
+    }
+    _delay_ms(10);
+  }
+  }
+}
+
 
 
 int main(void){
@@ -80,10 +94,16 @@ int main(void){
              p2_fn,
              0);
 
+  TCB_create(&p3_tcb,
+             p3_stack+THREAD_STACK_SIZE-1,
+             p3_fn,
+             0);           
+
   printf("TCBs created\n");
   
   TCBList_enqueue(&running_queue, &p1_tcb);
   TCBList_enqueue(&running_queue, &p2_tcb);
+  TCBList_enqueue(&running_queue, &p3_tcb);
   TCBList_enqueue(&running_queue, &idle_tcb);
 
   printf("TCBs in running queue\n");
