@@ -25,10 +25,11 @@ void putChar(char c)
     }
 }
 
-void putChar_test_01(void){
+void send(void){
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
         if(writing.digested != writing.saved) {
-            printf("%c\n", writing.buffer[writing.digested]);
+            while ( !(UCSR0A & (1<<RXC0)) );
+            UDR0 = writing.buffer[writing.digested];
             writing.buffer[writing.digested++] = 'd';
         }
     }
@@ -36,5 +37,5 @@ void putChar_test_01(void){
 
 void info(void)
 {
-    printf("Saved: %d, digested: %d,     buf: %s", writing.saved, writing.digested, writing.buffer);
+    printf("Saved: %d, digested: %d,     buf: %s\n", writing.saved, writing.digested, writing.buffer);
 }

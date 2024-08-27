@@ -24,7 +24,7 @@ void idle_fn(uint32_t thread_arg __attribute__((unused))){
   NONATOMIC_BLOCK(NONATOMIC_RESTORESTATE){
   while(1) {
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-      putChar_test_01();
+      send();
     }
     _delay_ms(10);
   }
@@ -38,7 +38,7 @@ void p1_fn(uint32_t arg __attribute__((unused))){
     char c = 'c';
   while(1){
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-      putChar(c);
+      putChar(c++);
     }
     _delay_ms(10);
   }

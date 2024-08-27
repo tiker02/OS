@@ -13,6 +13,6 @@ typedef struct io_structure
 
 void putChar(char c);
 
-void putChar_test_01(void);
+void send(void);
 
 void info(void);
