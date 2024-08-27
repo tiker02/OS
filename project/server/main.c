@@ -24,7 +24,7 @@ void idle_fn(uint32_t thread_arg __attribute__((unused))){
   NONATOMIC_BLOCK(NONATOMIC_RESTORESTATE){
   while(1) {
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-      putChar_test_01();
+      printf("i\n");
     }
     _delay_ms(10);
   }
@@ -35,10 +35,13 @@ TCB p1_tcb;
 uint8_t p1_stack[THREAD_STACK_SIZE];
 void p1_fn(uint32_t arg __attribute__((unused))){
   NONATOMIC_BLOCK(NONATOMIC_RESTORESTATE){
-    char c = 'c';
+  char c = 'c';
   while(1){
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-      putChar(c);
+      for(int i = 0; i<10; i++);
+      {
+        putChar(c);
+      }
     }
     _delay_ms(10);
   }
@@ -81,10 +84,10 @@ int main(void){
              0);
 
   printf("TCBs created\n");
-  
+  TCBList_enqueue(&running_queue, &idle_tcb);
   TCBList_enqueue(&running_queue, &p1_tcb);
   TCBList_enqueue(&running_queue, &p2_tcb);
-  TCBList_enqueue(&running_queue, &idle_tcb);
+  
 
   printf("TCBs in running queue\n");
 
