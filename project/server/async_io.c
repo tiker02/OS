@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include "uart.h"
 
+uint8_t DOR_check = 0;
+uint8_t shifter = 0;
 
 io_structure writing = 
 {
@@ -29,11 +31,12 @@ void getChar(void)
             _delay_ms(10);
             }
         }
+        printf("DOR0: %x\n", DOR_check);
         printf("%c\n", reading.buffer[reading.digested]);
         reading.buffer[reading.digested++] = 'd';
     }
 }
-
+/*
 void getChar_test01(void)
 {
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
@@ -42,6 +45,19 @@ void getChar_test01(void)
         {
             reading.buffer[reading.saved++] = UDR0;
         }
+    }
+}
+*/
+ISR(USART0_RX_vect)
+{
+    if(reading.saved != (reading.digested - 1))
+    {
+        DOR_check |= (UCSR0A & (1<<DOR0)) << ((shifter++)%7); //make a bitmap to check for Data OverRun in last readings
+        reading.buffer[reading.saved++] = UDR0;
+    }
+    else
+    {
+        char discarded = UDR0;
     }
 }
 
@@ -71,6 +87,8 @@ void send(void){
 
 void info(void)
 {
-    printf("Writing -> Saved: %d, digested: %d,     buf: %s\n", writing.saved, writing.digested, writing.buffer);
-    printf("Reading -> Saved: %d, digested: %d,     buf: %s\n", reading.saved, reading.digested, reading.buffer);
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+        printf("Writing -> Saved: %d, digested: %d,     buf: %s\n", writing.saved, writing.digested, writing.buffer);
+        printf("Reading -> Saved: %d, digested: %d,     buf: %s\n", reading.saved, reading.digested, reading.buffer);
+    }
 }

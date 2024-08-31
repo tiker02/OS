@@ -21,55 +21,37 @@
 TCB idle_tcb;
 uint8_t idle_stack[IDLE_STACK_SIZE];
 void idle_fn(uint32_t thread_arg __attribute__((unused))){
-  NONATOMIC_BLOCK(NONATOMIC_RESTORESTATE){
   while(1) {
-    ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-      
-      getChar_test01();
-    }
+    send();
     _delay_ms(10);
-  }
   }
 }
 
 TCB p1_tcb;
 uint8_t p1_stack[THREAD_STACK_SIZE];
 void p1_fn(uint32_t arg __attribute__((unused))){
-  NONATOMIC_BLOCK(NONATOMIC_RESTORESTATE){
-    char c = 'c';
+  char c = 'c';
   while(1){
-    ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-      putChar(c);
-    }
+    putChar(c);
     _delay_ms(10);
-  }
   }
 }
 
 TCB p2_tcb;
 uint8_t p2_stack[THREAD_STACK_SIZE];
 void p2_fn(uint32_t arg __attribute__((unused))){
-  NONATOMIC_BLOCK(NONATOMIC_RESTORESTATE){
   while(1){
-    ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-      info();
-      send();
-    }
+    info();
     _delay_ms(10);
-  }
   }
 }
 
 TCB p3_tcb;
 uint8_t p3_stack[THREAD_STACK_SIZE];
 void p3_fn(uint32_t arg __attribute__((unused))){
-  NONATOMIC_BLOCK(NONATOMIC_RESTORESTATE){
   while(1){
-    ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-      getChar();
-    }
+    getChar();
     _delay_ms(10);
-  }
   }
 }
 
