@@ -4,7 +4,7 @@
 #include <pthread.h>
 #include "serial_client.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 sem_t terminal_semaphore;
 int serial_fd;
@@ -75,7 +75,7 @@ void* read_serial()
     }
 
     int ret, rd = 1;
-    while(read_buf[rd - 1] != '\n')
+    while(read_buf[rd - 1] != '!')
     {
         ret = sem_wait(&terminal_semaphore);
         if(ret == -1) { perror("Error occurred on sem_wait@write_serial\n"); exit(EXIT_FAILURE); }
@@ -121,6 +121,7 @@ int main()
     if(ret != 0) { perror("Error occurred in writing thread detaching\n"); exit(EXIT_FAILURE);}
     ret = pthread_join(read_thread, NULL);
     if(ret != 0) { perror("Error occurred in reading thread detaching\n"); exit(EXIT_FAILURE);}
+    fprintf(stderr, "EHNNO\n");
     //ret = sem_destroy(&terminal_semaphore);
     //if(ret == -1) { perror("Error occurred in semaphore destroying\n"); exit(EXIT_FAILURE); }
 

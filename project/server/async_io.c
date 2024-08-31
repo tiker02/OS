@@ -34,13 +34,13 @@ void getChar(void)
     }
 }
 
-void getChar_test00(void)
+void getChar_test01(void)
 {
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
     {
-        if(reading.saved != (reading.digested - 1))
+        while(reading.saved != (reading.digested - 1) && (UCSR0A & (1<<RXC0)) )
         {
-            reading.buffer[reading.saved++] = 'c';
+            reading.buffer[reading.saved++] = UDR0;
         }
     }
 }
@@ -62,7 +62,7 @@ void putChar(char c)
 void send(void){
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
         if(writing.digested != writing.saved) {
-            while ( !(UCSR0A & (1<<RXC0)) );
+            while ( !(UCSR0A & (1<<UDRE0)) ); 
             UDR0 = writing.buffer[writing.digested];
             writing.buffer[writing.digested++] = 'd';
         }
