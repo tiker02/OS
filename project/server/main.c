@@ -41,6 +41,7 @@ TCB p2_tcb;
 uint8_t p2_stack[THREAD_STACK_SIZE];
 void p2_fn(uint32_t arg __attribute__((unused))){
   while(1){
+    putChar('e');
     info();
     _delay_ms(10);
   }
@@ -56,6 +57,14 @@ void p3_fn(uint32_t arg __attribute__((unused))){
 }
 
 
+TCB p4_tcb;
+uint8_t p4_stack[THREAD_STACK_SIZE];
+void p4_fn(uint32_t arg __attribute__((unused))){
+  while(1){
+    getChar();
+    _delay_ms(10);
+  }
+}
 
 int main(void){
   // we need printf for debugging
@@ -82,11 +91,17 @@ int main(void){
              p3_fn,
              0);           
 
+  TCB_create(&p4_tcb,
+             p4_stack+THREAD_STACK_SIZE-1,
+             p4_fn,
+             0);           
+
   printf("TCBs created\n");
   
   TCBList_enqueue(&running_queue, &p1_tcb);
   TCBList_enqueue(&running_queue, &p2_tcb);
   TCBList_enqueue(&running_queue, &p3_tcb);
+  TCBList_enqueue(&running_queue, &p4_tcb);
   TCBList_enqueue(&running_queue, &idle_tcb);
 
   printf("TCBs in running queue\n");
