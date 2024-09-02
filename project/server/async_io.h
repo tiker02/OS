@@ -15,6 +15,4 @@ void getChar(void);
 
 void putChar(char c);
 
-void send(void);
-
 void info(void);

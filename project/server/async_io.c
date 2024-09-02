@@ -12,6 +12,7 @@
 uint8_t DOR_check = 0;
 uint8_t shifter = 0;
 
+
 io_structure writing = 
 {
     .saved = 0,
@@ -37,6 +38,13 @@ io_structure reading =
     .last=NULL,
     .size=0
  };
+
+uint8_t sender_init = 0;
+TCB send_tcb;
+uint8_t send_stack[64];
+void send(void);
+void send_fn(uint32_t thread_arg __attribute__((unused)));
+void send_init(void);
 
 void io_wait(uint8_t io);
 TCBList* io_wait_queue(uint8_t io);
@@ -74,6 +82,12 @@ ISR(USART0_RX_vect)
 void putChar(char c)
 {
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+        if(!sender_init)
+        {
+            send_init();
+            sender_init = 1;
+        }
+
         while(writing.saved == (writing.digested - 1))
         {
             TCBList_print(io_wait_queue(WRITE));
@@ -92,6 +106,23 @@ void send(void){
             
             if(io_wait_queue(WRITE)->size > 0) io_wake_up(WRITE);
         }
+    }
+}
+
+void send_fn(uint32_t thread_arg __attribute__((unused))){
+  while(1) {
+    send();
+    _delay_ms(10);
+  }
+}
+
+void send_init()
+{
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        TCB_create(&send_tcb, send_stack + 63, send_fn, 0);
+        TCBList_enqueue(&running_queue, &send_tcb);
+        printf("Send initialized\n");
     }
 }
 

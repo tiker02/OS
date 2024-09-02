@@ -22,8 +22,8 @@ TCB idle_tcb;
 uint8_t idle_stack[IDLE_STACK_SIZE];
 void idle_fn(uint32_t thread_arg __attribute__((unused))){
   while(1) {
-    send();
-    _delay_ms(10);
+    _delay_ms(100);
+    info();
   }
 }
 
@@ -42,7 +42,6 @@ uint8_t p2_stack[THREAD_STACK_SIZE];
 void p2_fn(uint32_t arg __attribute__((unused))){
   while(1){
     putChar('e');
-    info();
     _delay_ms(10);
   }
 }
