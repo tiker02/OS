@@ -2,6 +2,7 @@
 #include <util/atomic.h>
 #include <util/delay.h>
 #include <stdio.h>
+#include <avr/sleep.h>
 #include "uart.h"
 #include "scheduler.h"
 #include "atomport_asm.h"
@@ -44,7 +45,7 @@ TCB send_tcb;
 uint8_t send_stack[64];
 void send(void);
 void send_fn(uint32_t thread_arg __attribute__((unused)));
-void send_init(void);
+void async_io_init(void);
 
 void io_wait(uint8_t io);
 TCBList* io_wait_queue(uint8_t io);
@@ -82,12 +83,6 @@ ISR(USART0_RX_vect)
 void putChar(char c)
 {
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-        if(!sender_init)
-        {
-            send_init();
-            sender_init = 1;
-        }
-
         while(writing.saved == (writing.digested - 1))
         {
             TCBList_print(io_wait_queue(WRITE));
@@ -106,17 +101,23 @@ void send(void){
             
             if(io_wait_queue(WRITE)->size > 0) io_wake_up(WRITE);
         }
-    }
+        else 
+        {
+            NONATOMIC_BLOCK(NONATOMIC_RESTORESTATE)
+            {   
+                SMCR |= 0x01;
+                sleep_cpu();
+            }
+        }     }
 }
 
 void send_fn(uint32_t thread_arg __attribute__((unused))){
   while(1) {
     send();
-    _delay_ms(10);
   }
 }
 
-void send_init()
+void async_io_init()
 {
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
     {
@@ -148,7 +149,6 @@ void io_wait(uint8_t io)
         TCB* old_tcb=current_tcb;
         TCBList_enqueue(wait_queue, current_tcb);
         current_tcb=TCBList_dequeue(&running_queue);
-        if (old_tcb!=current_tcb)
         printf("WAIT %d\n", io);
         archContextSwitch(old_tcb, current_tcb);
         printf("YEP\n");
@@ -163,7 +163,6 @@ void io_wake_up(uint8_t io)
         TCB* old_tcb=current_tcb;
         TCBList_enqueue(&running_queue, current_tcb);
         current_tcb=TCBList_dequeue(wait_queue);
-        if (old_tcb!=current_tcb)
         printf("WAKE UP %d\n", io);
         archContextSwitch(old_tcb, current_tcb);
         printf("SIU\n");

@@ -11,6 +11,9 @@ typedef struct io_structure
     uint8_t digested;
 } io_structure;
 
+//strictly required before using getChar and putChar
+void async_io_init(void);
+
 void getChar(void);
 
 void putChar(char c);

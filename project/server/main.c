@@ -68,6 +68,7 @@ void p4_fn(uint32_t arg __attribute__((unused))){
 int main(void){
   // we need printf for debugging
   printf_init();
+  
   printf("Initializing: %x\n", MCUSR);
 
   TCB_create(&idle_tcb,
@@ -106,5 +107,6 @@ int main(void){
   printf("TCBs in running queue\n");
 
   printf("starting\n");
+  async_io_init();
   startSchedule();
 }
