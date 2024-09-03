@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <semaphore.h>
 #include <pthread.h>
+#include <unistd.h>
 #include "serial_client.h"
 
 #define DEBUG 0
@@ -36,7 +37,7 @@ void* write_serial()
     if(DEBUG) fprintf(stderr, "Writing thread started\n");
 
     char write_char = 0;
-    while(write_char != '\n')
+    while(write_char != '!')
     {
         
 
@@ -56,6 +57,7 @@ void* write_serial()
 
         ret = sem_post(&terminal_semaphore);
         if(ret == -1) { perror("Error occurred on sem_post@write_serial\n"); exit(EXIT_FAILURE); }
+        sleep(1);
 
     }    
     pthread_exit(NULL);
@@ -121,7 +123,7 @@ int main()
     if(ret != 0) { perror("Error occurred in writing thread detaching\n"); exit(EXIT_FAILURE);}
     ret = pthread_join(read_thread, NULL);
     if(ret != 0) { perror("Error occurred in reading thread detaching\n"); exit(EXIT_FAILURE);}
-    fprintf(stderr, "EHNNO\n");
+    fprintf(stderr, "Terminated\n");
     //ret = sem_destroy(&terminal_semaphore);
     //if(ret == -1) { perror("Error occurred in semaphore destroying\n"); exit(EXIT_FAILURE); }
 

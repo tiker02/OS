@@ -51,8 +51,9 @@ void io_wait(uint8_t io);
 TCBList* io_wait_queue(uint8_t io);
 void io_wake_up(uint8_t io);
 
-void getChar(void)
+char getChar(void)
 {
+    char c = 0;
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
     {
         while(reading.digested == reading.saved)
@@ -61,9 +62,11 @@ void getChar(void)
             io_wait(READ);
         }
         printf("DOR0: %x\n", DOR_check);
-        printf("%c\n", reading.buffer[reading.digested]);
+        c = reading.buffer[reading.digested];
+        printf("%c\n", c);
         reading.buffer[reading.digested++] = 'd';
     }
+    return c;
 }
 
 ISR(USART0_RX_vect)
